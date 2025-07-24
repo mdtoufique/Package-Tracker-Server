@@ -50,3 +50,13 @@ export const ingestPackageUpdate = async (req, res) => {
     return res.status(500).json({ error: 'Failed to process package update' });
   }
 };
+
+export const getActivePackages = async (req, res) => {
+  try {
+    const packages = await Package.find().sort({ event_timestamp: -1 });
+    res.status(200).json(packages);
+  } catch (error) {
+    console.error('Failed to fetch packages:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
