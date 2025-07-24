@@ -1,6 +1,9 @@
 import express from 'express';
 import packageRoutes from './routes/packageRoutes.js';
 import cors from 'cors'
+import alertRoutes from './routes/alertRoutes.js';
+
+
 const app = express();
 
 app.use(cors({
@@ -15,5 +18,6 @@ app.get('/', (req, res) => {
 
 // Register package routes
 app.use('/api/packages', packageRoutes);
-
+// Alert routes
+app.use('/api/alerts', alertRoutes);
 export default app;
