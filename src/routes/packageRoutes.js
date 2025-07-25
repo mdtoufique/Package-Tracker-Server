@@ -42,7 +42,7 @@ router.post("/update", async (req, res) => {
 			});
 		} else {
 			const isNewer =
-				bdNow(existing.event_timestamp) < event_timestamp;
+				existing.event_timestamp < event_timestamp;
 			const isDifferent =
 				existing.status !== status ||
 				existing.lat !== lat ||
@@ -51,7 +51,8 @@ router.post("/update", async (req, res) => {
 				(existing.eta?.toISOString() || null) !==
 					(eta ? bdNow(eta).toISOString() : null);
 
-
+            // console.log(isNewer,isDifferent);
+            // console.log(typeof(existing.event_timestamp),typeof(event_timestamp))
 			if (isNewer && isDifferent) {
 				existing.status = status;
 				existing.lat = lat;
