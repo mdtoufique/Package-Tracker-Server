@@ -7,9 +7,13 @@ import { verifyApiToken } from "./middlewares/auth.js";
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173','http://package-tracker-client.vercel.app'], 
+  origin: [
+    'http://localhost:5173',
+    'https://package-tracker-client.vercel.app'
+  ],
   methods: ['GET', 'POST'],
 }));
+
 app.use(express.json());
 
 
