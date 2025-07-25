@@ -12,6 +12,7 @@ const packageSchema = new mongoose.Schema({
       'DELIVERED',
       'EXCEPTION',
       'CANCELLED',
+      'STUCK'
     ],
     required: true,
   },

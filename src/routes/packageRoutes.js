@@ -5,7 +5,8 @@ import PackageEvent from "../models/PackageEvent.js";
 const router = express.Router();
 
 // Utility: Get current Bangladesh time
-const bdNow = () => new Date(Date.now() + 6 * 60 * 60 * 1000);
+const bdNow = (d = new Date()) => new Date(new Date(d).getTime() + 6 * 60 * 60 * 1000);
+
 
 // POST /api/packages/update
 router.post("/update", async (req, res) => {
@@ -19,7 +20,7 @@ router.post("/update", async (req, res) => {
 		const existing = await Package.findOne({ package_id });
 
 		let updatedPkg;
-		const existingEvent = await PackageEvent.findOne({ package_id });
+		const existingEvent = await Package.findOne({ package_id });
 		if (existingEvent && status==="CREATED") {
 			return res
 				.status(409)
@@ -36,19 +37,19 @@ router.post("/update", async (req, res) => {
 				event_timestamp,
 				received_at,
 				note,
-				eta: eta ? new Date(eta) : undefined
+				eta: eta ? bdNow(eta) : undefined
 
 			});
 		} else {
 			const isNewer =
-				new Date(existing.event_timestamp) < event_timestamp;
+				bdNow(existing.event_timestamp) < event_timestamp;
 			const isDifferent =
 				existing.status !== status ||
 				existing.lat !== lat ||
 				existing.lon !== lon ||
 				existing.note !== note ||
 				(existing.eta?.toISOString() || null) !==
-					(eta ? new Date(eta).toISOString() : null);
+					(eta ? bdNow(eta).toISOString() : null);
 
 
 			if (isNewer && isDifferent) {
@@ -58,7 +59,7 @@ router.post("/update", async (req, res) => {
 				existing.event_timestamp = event_timestamp;
 				existing.received_at = received_at;
 				existing.note = note;
-				existing.eta = eta ? new Date(eta) : undefined;
+				existing.eta = eta ? bdNow(eta) : undefined;
 
 				await existing.save();
 			}
@@ -72,7 +73,7 @@ router.post("/update", async (req, res) => {
 			lat,
 			lon,
 			note,
-			eta: eta ? new Date(eta) : undefined,
+			eta: eta ? bdNow(eta) : undefined,
 			event_timestamp,
 			received_at,
 		});

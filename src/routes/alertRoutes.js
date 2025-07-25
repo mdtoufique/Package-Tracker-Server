@@ -17,4 +17,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+router.get("/count", async (req, res) => {
+  try {
+    const resolved = req.query.resolved === "true";
+    const count = await Alert.countDocuments({ resolved });
+    res.json({ count });
+  } catch (error) {
+    console.error("❌ Failed to count alerts:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default router;
