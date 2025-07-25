@@ -1,7 +1,7 @@
 import express from "express";
 import Package from "../models/Package.js";
 import Alert from "../models/Alert.js";
-
+import PackageEvent from "../models/PackageEvent.js";
 const router = express.Router();
 
 // Utility: Get current Bangladesh time
@@ -12,15 +12,21 @@ router.post("/update", async (req, res) => {
 	try {
 		const { package_id, status, lat, lon, timestamp, note, eta } = req.body;
 
-		const event_timestamp = new Date(
-			new Date(timestamp).getTime() + 6 * 60 * 60 * 1000
-		);
+		const event_timestamp = new Date(timestamp);
+
 		const received_at = bdNow();
 
 		const existing = await Package.findOne({ package_id });
 
 		let updatedPkg;
-
+		const existingEvent = await PackageEvent.findOne({ package_id });
+		if (existingEvent && status==="CREATED") {
+			return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} already exists in event history.`,
+				});
+		}
 		if (!existing) {
 			updatedPkg = await Package.create({
 				package_id,
@@ -30,9 +36,8 @@ router.post("/update", async (req, res) => {
 				event_timestamp,
 				received_at,
 				note,
-				eta: eta
-					? new Date(new Date(eta).getTime() + 6 * 60 * 60 * 1000)
-					: undefined,
+				eta: eta ? new Date(eta) : undefined
+
 			});
 		} else {
 			const isNewer =
@@ -43,11 +48,8 @@ router.post("/update", async (req, res) => {
 				existing.lon !== lon ||
 				existing.note !== note ||
 				(existing.eta?.toISOString() || null) !==
-					(eta
-						? new Date(
-								new Date(eta).getTime() + 6 * 60 * 60 * 1000
-						  ).toISOString()
-						: null);
+					(eta ? new Date(eta).toISOString() : null);
+
 
 			if (isNewer && isDifferent) {
 				existing.status = status;
@@ -56,14 +58,24 @@ router.post("/update", async (req, res) => {
 				existing.event_timestamp = event_timestamp;
 				existing.received_at = received_at;
 				existing.note = note;
-				existing.eta = eta
-					? new Date(new Date(eta).getTime() + 6 * 60 * 60 * 1000)
-					: undefined;
+				existing.eta = eta ? new Date(eta) : undefined;
+
 				await existing.save();
 			}
 
 			updatedPkg = existing;
 		}
+        // --- ✅ Log Event to PackageEvent collection ---
+		await PackageEvent.create({
+			package_id,
+			status,
+			lat,
+			lon,
+			note,
+			eta: eta ? new Date(eta) : undefined,
+			event_timestamp,
+			received_at,
+		});
 
 		// --- ✅ Alert Resolver Logic ---
 		const STUCK_THRESHOLD_MINUTES = 30;
@@ -111,6 +123,32 @@ router.get("/active", async (req, res) => {
 	} catch (error) {
 		console.error("❌ Failed to fetch packages:", error);
 		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+
+
+
+
+// GET /api/packages/:id/history
+router.get("/:id/history", async (req, res) => {
+	try {
+		const package_id = req.params.id;
+
+		const events = await PackageEvent.find({ package_id }).sort({
+			event_timestamp: 1, // chronological order
+		});
+
+		if (!events || events.length === 0) {
+			return res
+				.status(404)
+				.json({ message: "No history found for this package" });
+		}
+
+		res.status(200).json(events);
+	} catch (error) {
+		console.error("❌ Failed to fetch package history:", error);
+		res.status(500).json({ error: "Failed to fetch history" });
 	}
 });
 
