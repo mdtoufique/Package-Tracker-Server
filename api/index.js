@@ -1,7 +1,7 @@
 // api/index.js
 import app from '../src/app.js';
-import connectDB from '../src/db.js';
-import { startAlertService } from '../src/alertService.js';
+import connectDB from '../src/utils/db.js';
+import { startAlertService } from '../src/services/alertService.js';
 
 // Ensure DB is connected and services started
 let isInitialized = false;
