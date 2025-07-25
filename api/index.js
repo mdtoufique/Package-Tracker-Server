@@ -1,4 +1,6 @@
-// api/index.js
+
+import fs from 'fs';
+import path from 'path';
 import app from '../src/app.js';
 import connectDB from '../src/utils/db.js';
 import { startAlertService } from '../src/services/alertService.js';
