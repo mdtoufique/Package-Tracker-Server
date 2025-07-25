@@ -13,8 +13,9 @@ router.post("/update", async (req, res) => {
 	try {
 		const { package_id, status, lat, lon, timestamp, note, eta } = req.body;
 
+        //bd time paisi
 		const event_timestamp = new Date(timestamp);
-
+        // bd time e ase but boltese us
 		const received_at = bdNow();
 
 		const existing = await Package.findOne({ package_id });
@@ -28,6 +29,7 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} already exists in event history.`,
 				});
 		}
+        //console.log(eta);
 		if (!existing) {
 			updatedPkg = await Package.create({
 				package_id,
@@ -37,7 +39,7 @@ router.post("/update", async (req, res) => {
 				event_timestamp,
 				received_at,
 				note,
-				eta: eta ? bdNow(eta) : undefined
+				eta: eta ? eta : undefined
 
 			});
 		} else {
@@ -49,7 +51,7 @@ router.post("/update", async (req, res) => {
 				existing.lon !== lon ||
 				existing.note !== note ||
 				(existing.eta?.toISOString() || null) !==
-					(eta ? bdNow(eta).toISOString() : null);
+					(eta ? eta.toISOString() : null);
 
             // console.log(isNewer,isDifferent);
             // console.log(typeof(existing.event_timestamp),typeof(event_timestamp))
@@ -60,7 +62,7 @@ router.post("/update", async (req, res) => {
 				existing.event_timestamp = event_timestamp;
 				existing.received_at = received_at;
 				existing.note = note;
-				existing.eta = eta ? bdNow(eta) : undefined;
+				existing.eta = eta ? eta : undefined;
 
 				await existing.save();
 			}
@@ -74,7 +76,7 @@ router.post("/update", async (req, res) => {
 			lat,
 			lon,
 			note,
-			eta: eta ? bdNow(eta) : undefined,
+			eta: eta ? eta : undefined,
 			event_timestamp,
 			received_at,
 		});
