@@ -50,8 +50,9 @@ export function startAlertService() {
                 });
 
           // Update package status to STUCK
-            pkg.status = 'STUCK';
+            
             pkg.note=`Package ${pkg.package_id} stuck in state "${pkg.status}".`;
+            pkg.status = 'STUCK';
             pkg.event_timestamp=new Date(Date.now() + 6 * 60 * 60 * 1000);
             await pkg.save();
           console.log(`[AlertService] Alert created for package: ${pkg.package_id}`);
