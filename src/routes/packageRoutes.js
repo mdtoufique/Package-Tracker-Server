@@ -22,6 +22,14 @@ router.post("/update", async (req, res) => {
 
 		let updatedPkg;
 		const existingEvent = await Package.findOne({ package_id });
+         if(existingEvent && (existing.status==="CANCELLED" || existing.status==="DELIVERED"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} CANCELLED or DELIVERED.`,
+				});
+		}
 		if (existingEvent && status==="CREATED") {
 			return res
 				.status(409)
