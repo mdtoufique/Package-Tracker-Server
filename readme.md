@@ -144,7 +144,7 @@ npm install
 Create a .env file in the root:
 
 ```ini
-PORT=5000
+PORT=your_port
 MONGO_URI=your_mongodb_connection_string
 API_TOKEN=your_api_token_here
 ```
