@@ -9,7 +9,7 @@ let isInitialized = false;
 export default async function handler(req, res) {
   if (!isInitialized) {
     await connectDB();
-    startAlertService();
+    //startAlertService();
     isInitialized = true;
   }
   app(req, res);

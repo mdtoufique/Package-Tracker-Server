@@ -1,6 +1,6 @@
 import express from 'express';
 import Alert from '../models/Alert.js';
-
+import  checkStuckPackages from '../services/alerServiceCJ.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -16,6 +16,16 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch alerts' });
   }
 });
+
+router.post('/check-stuck', authMiddleware, async (req, res) => {
+  try {
+    await checkStuckPackages();
+    res.status(200).json({ message: 'Stuck package check completed' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to check stuck packages' });
+  }
+});
+
 
 
 router.get("/count", async (req, res) => {
