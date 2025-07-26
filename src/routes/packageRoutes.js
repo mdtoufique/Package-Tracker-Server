@@ -13,6 +13,20 @@ router.post("/update", async (req, res) => {
 	try {
 		const { package_id, status, lat, lon, timestamp, note, eta } = req.body;
 
+        const getLastValidStatus = async (package_id) => {
+			const events = await PackageEvent.find({ package_id }).sort({
+				event_timestamp: -1,
+			});
+
+			for (const event of events) {
+				if (!["EXCEPTION", "STUCK"].includes(event.status)) {
+					return event.status;
+				}
+			}
+
+			return null; // no valid status found
+		};
+
         //bd time paisi
 		const event_timestamp = new Date(timestamp);
         // bd time e ase but boltese us
@@ -30,13 +44,36 @@ router.post("/update", async (req, res) => {
 		// 			message: `Package ${package_id} CANCELLED or DELIVERED.`,
 		// 		});
 		// }
+        let lastValidStatus;
+        let EXCP="";
+        if (existingEvent) 
+        {
+			lastValidStatus = existing.status;
+		}
 
-        if(existingEvent && (existing.status==="CANCELLED" || existing.status==="DELIVERED"))
+        
+        if((existingEvent && lastValidStatus===null) ||(existingEvent && lastValidStatus===undefined))
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id} already ${existing.status}.`,
+					message: `For Package ${package_id} last valid sate is unknown.`,
+				});
+        }
+
+        
+        if (existingEvent && ["EXCEPTION", "STUCK"].includes(lastValidStatus)) {
+            let TMP=lastValidStatus;
+			lastValidStatus = await getLastValidStatus(package_id);
+            EXCP=`Package ${package_id} is in ${TMP}. Last valid status for `;
+		}
+
+        if(existingEvent && (lastValidStatus==="CANCELLED" || lastValidStatus==="DELIVERED"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} already ${lastValidStatus}.`,
 				});
 		}
         if (existingEvent && status==="CREATED") {
@@ -54,47 +91,48 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} Not Created yet.`,
 				});
 		}
-        if(existingEvent && existing.status!=="CREATED" && status==="CANCELLED")
+        if(existingEvent && lastValidStatus!=="CREATED" && status==="CANCELLED")
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id} is in ${existing.status}. Cant be cancelled after PICK UP.`,
+					message: `${EXCP}Package ${package_id} is in ${lastValidStatus}. Cant be cancelled after PICK UP.`,
 				});
 		}
-        if(existingEvent && existing.status==="CREATED" && !(status==="PICKED_UP" ||status==="CANCELLED" ||status==="EXCEPTION"))
+        if(existingEvent && lastValidStatus==="CREATED" && !(status==="PICKED_UP" ||status==="CANCELLED" ||status==="EXCEPTION"))
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id} not PICKED UP yet.`,
+					message: `${EXCP}Package ${package_id} is CREATED .CANT ${status}.`,
 				});
 		}
-        if(existingEvent && existing.status==="PICKED_UP" && !(status==="IN_TRANSIT" || status==="EXCEPTION"))
+        if(existingEvent && lastValidStatus==="PICKED_UP" && !(status==="IN_TRANSIT" || status==="EXCEPTION"))
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id}  is PICKED UP. CANT be ${status}.`,
+					message: `${EXCP}Package ${package_id}  is PICKED UP. CANT be ${status}.`,
 				});
 		}
 
-        if(existingEvent && existing.status==="IN_TRANSIT" && !(status==="OUT_FOR_DELIVERY" || status==="EXCEPTION"))
+        if(existingEvent && lastValidStatus==="IN_TRANSIT" && !(status==="OUT_FOR_DELIVERY" || status==="EXCEPTION"))
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id}  is IN TRANSIT. CANT be ${status}.`,
+					message: `${EXCP}Package ${package_id}  is IN TRANSIT. CANT be ${status}.`,
 				});
 		}
-        if(existingEvent && existing.status==="OUT_FOR_DELIVERY" && !(status==="DELIVERED" || status==="EXCEPTION"))
+        if(existingEvent && lastValidStatus==="OUT_FOR_DELIVERY" && !(status==="DELIVERED" || status==="EXCEPTION"))
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id}  is IN OUT FOR DELIVERY. CANT be ${status}.`,
+					message: `${EXCP}Package ${package_id}  is IN OUT FOR DELIVERY. CANT be ${status}.`,
 				});
 		}
+        
         
 		
         
