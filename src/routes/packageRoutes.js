@@ -29,6 +29,14 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} already exists in event history.`,
 				});
 		}
+        if(existingEvent && (existing.status==="CANCELLED" || existing.status==="STUCK"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} CANCELLED or DELIVERED.`,
+				});
+		}
         //console.log(eta);
 		if (!existing) {
 			updatedPkg = await Package.create({
