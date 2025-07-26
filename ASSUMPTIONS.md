@@ -25,6 +25,60 @@ This document outlines assumptions, design choices, and known limitations made w
 - Terminal statuses like `DELIVERED` and `CANCELLED` define when a package becomes inactive.
 
 ---
+## 📦 Package Status Lifecycle
+
+This system enforces a strict status transition lifecycle to ensure reliable tracking and consistent updates.
+
+---
+
+### 🧾 Status Definitions
+
+- `CREATED` – Label generated; package not yet picked up.
+- `PICKED_UP` – Courier has picked up the package.
+- `IN_TRANSIT` – Package is moving between hubs or facilities.
+- `OUT_FOR_DELIVERY` – Package is out with a delivery agent for final drop.
+- `DELIVERED` – Package delivered to the recipient.
+- `EXCEPTION` – Temporary issue such as address error, weather hold, etc.
+- `STUCK` – Package has not progressed in a while; awaiting further updates.
+- `CANCELLED` – Shipment was cancelled.
+
+---
+
+### 🔁 Status Transition Table
+
+| **Current Status**     | **Allowed Next Statuses**                      |
+|------------------------|------------------------------------------------|
+| `CREATED`              | `PICKED_UP`, `CANCELLED`, `EXCEPTION` ,`STUCK` |
+| `PICKED_UP`            | `IN_TRANSIT`, `EXCEPTION`, `STUCK`             |
+| `IN_TRANSIT`           | `OUT_FOR_DELIVERY`, `EXCEPTION`, `STUCK`       |
+| `OUT_FOR_DELIVERY`     | `DELIVERED`, `EXCEPTION`, `STUCK`              |
+| `EXCEPTION`            | *(Can transition forward again)*               |
+| `STUCK`                | *(Can transition forward again)*               |
+| `DELIVERED`            | *(No further transitions)*                     |
+| `CANCELLED`            | *(No further transitions)*                     |
+
+---
+
+### ⚠️ Backend Validation Rules
+
+- A package must be initialized with the `CREATED` status.
+- No updates are accepted once a package is `DELIVERED` or `CANCELLED`.
+- Only valid transitions (as per the table above) are allowed.
+- Skipping intermediate steps (e.g., `CREATED` → `IN_TRANSIT`) is **not allowed**.
+- `EXCEPTION` and `STUCK` are temporary states and allow resuming forward progression.
+
+---
+
+### 🧭 Example Lifecycle
+
+```text
+CREATED     →   PICKED_UP   →   IN_TRANSIT  →   OUT_FOR_DELIVERY    →   DELIVERED
+|→ (CANCELLED)      ↘              ↘                 ↘
+|→------------------------------------------------------------→  (EXCEPTION || STUCK) → (resume flow FORWARD)
+
+```
+
+---
 
 ## 🧾 Data Model Design
 
