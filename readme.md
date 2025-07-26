@@ -107,7 +107,8 @@ AAMIRA-SERVER/
 │   ├── scripts/
 │   │   └── cleanupOrphanData.js
 │   ├── services/
-│   │   └── alertService.js
+│   │   ├── alertService.js
+│   │   └── alertServiceCJ.js
 │   ├── utils/
 │   │   └── db.js
 │   ├── app.js
