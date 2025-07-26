@@ -30,6 +30,7 @@ router.post("/update", async (req, res) => {
 		// 			message: `Package ${package_id} CANCELLED or DELIVERED.`,
 		// 		});
 		// }
+
         if(existingEvent && (existing.status==="CANCELLED" || existing.status==="DELIVERED"))
         {
             return res
@@ -38,7 +39,7 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} already ${existing.status}.`,
 				});
 		}
-		if (existingEvent && status==="CREATED") {
+        if (existingEvent && status==="CREATED") {
 			return res
 				.status(409)
 				.json({
@@ -53,6 +54,50 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} Not Created yet.`,
 				});
 		}
+        if(existingEvent && existing.status!=="CREATED" && status!=="CANCELLED")
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} is in ${existing.status}. Cant be cancelled after PICK UP.`,
+				});
+		}
+        if(existingEvent && existing.status==="CREATED" && !(status==="PICKED_UP" ||status==="CANCELLED" ||status==="EXCEPTION"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} not PICKED UP yet.`,
+				});
+		}
+        if(existingEvent && existing.status==="PICKED_UP" && !(status==="IN_TRANSIT" || status==="EXCEPTION"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id}  is PICKED UP. CANT be ${status}.`,
+				});
+		}
+
+        if(existingEvent && existing.status==="IN_TRANSIT" && !(status==="OUT_FOR_DELIVERY" || status==="EXCEPTION"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id}  is IN TRANSIT. CANT be ${status}.`,
+				});
+		}
+        if(existingEvent && existing.status==="OUT_FOR_DELIVERY" && !(status==="DELIVERED" || status==="EXCEPTION"))
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id}  is IN OUT FOR DELIVERY. CANT be ${status}.`,
+				});
+		}
+        
+		
+        
         //console.log(eta);
 		if (!existing) {
 			updatedPkg = await Package.create({
