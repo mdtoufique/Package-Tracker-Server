@@ -4,6 +4,12 @@ This is the backend server for the Aamira Courier Package Tracker challenge, bui
 
 ---
 
+## 📌 Additional Documentation
+
+- [🧠 Assumptions & Design Decisions](./ASSUMPTIONS.md)
+
+---
+
 ## 🔧 Tech Stack
 
 - **Node.js** with **Express**
