@@ -220,5 +220,3 @@ Backend is deployed via **Vercel** with `src/api/index.js` as the entry point (m
 
 - **GitHub**: [mdtoufique](https://github.com/mdtoufique)  
 - **Email**: mdrehmant@email.com
-
-
