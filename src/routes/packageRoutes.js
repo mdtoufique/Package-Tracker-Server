@@ -54,7 +54,7 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} Not Created yet.`,
 				});
 		}
-        if(existingEvent && existing.status!=="CREATED" && status!=="CANCELLED")
+        if(existingEvent && existing.status!=="CREATED" && status==="CANCELLED")
         {
             return res
 				.status(409)
