@@ -145,8 +145,8 @@ Create a .env file in the root:
 
 ```ini
 PORT=5000
-MONGO_URI=mongodb+srv://mdrehmant:EsIe5hwcPsCEyTZS@cluster0.1achwjn.mongodb.net/courier
-API_TOKEN=aamira_2025_TOUFIQUE
+MONGO_URI=your_mongodb_connection_string
+API_TOKEN=your_api_token_here
 ```
 
 ### 4. Run locally
