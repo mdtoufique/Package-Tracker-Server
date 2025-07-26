@@ -42,7 +42,7 @@ router.post("/update", async (req, res) => {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id} Not Created.`,
+					message: `Package ${package_id} Not Created yet.`,
 				});
 		}
         //console.log(eta);
