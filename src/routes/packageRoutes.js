@@ -37,6 +37,14 @@ router.post("/update", async (req, res) => {
 					message: `Package ${package_id} CANCELLED or DELIVERED.`,
 				});
 		}
+        if(!existingEvent && status!=="CREATED")
+        {
+            return res
+				.status(409)
+				.json({
+					message: `Package ${package_id} Not Created.`,
+				});
+		}
         //console.log(eta);
 		if (!existing) {
 			updatedPkg = await Package.create({
