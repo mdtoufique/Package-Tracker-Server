@@ -1,6 +1,6 @@
 import express from 'express';
 import Alert from '../models/Alert.js';
-import  checkStuckPackages from '../services/alerServiceCJ.js';
+import  {checkStuckPackages} from '../services/alertServiceCJ.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
