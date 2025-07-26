@@ -104,7 +104,7 @@ router.post("/update", async (req, res) => {
             return res
 				.status(409)
 				.json({
-					message: `${EXCP}Package ${package_id} is CREATED .CANT ${status}.`,
+					message: `${EXCP}Package ${package_id} is in CREATED .CANT be ${status}.`,
 				});
 		}
         if(existingEvent && lastValidStatus==="PICKED_UP" && !(status==="IN_TRANSIT" || status==="EXCEPTION"))
