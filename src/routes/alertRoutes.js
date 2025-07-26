@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/check-stuck', authMiddleware, async (req, res) => {
+router.post('/check-stuck', async (req, res) => {
   try {
     await checkStuckPackages();
     res.status(200).json({ message: 'Stuck package check completed' });
