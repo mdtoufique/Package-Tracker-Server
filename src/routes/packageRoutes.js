@@ -22,27 +22,27 @@ router.post("/update", async (req, res) => {
 
 		let updatedPkg;
 		const existingEvent = await Package.findOne({ package_id });
-         if(existingEvent && (existing.status==="CANCELLED" || existing.status==="DELIVERED"))
+        // if(existingEvent && (existing.status==="CANCELLED" || existing.status==="DELIVERED"))
+        // {
+        //     return res
+		// 		.status(409)
+		// 		.json({
+		// 			message: `Package ${package_id} CANCELLED or DELIVERED.`,
+		// 		});
+		// }
+        if(existingEvent && (existing.status==="CANCELLED" || existing.status==="DELIVERED"))
         {
             return res
 				.status(409)
 				.json({
-					message: `Package ${package_id} CANCELLED or DELIVERED.`,
+					message: `Package ${package_id} already ${existing.status}.`,
 				});
 		}
 		if (existingEvent && status==="CREATED") {
 			return res
 				.status(409)
 				.json({
-					message: `Package ${package_id} already exists in event history.`,
-				});
-		}
-        if(existingEvent && (existing.status==="CANCELLED" || existing.status==="STUCK"))
-        {
-            return res
-				.status(409)
-				.json({
-					message: `Package ${package_id} CANCELLED or DELIVERED.`,
+					message: `Package ${package_id} already CREATED.`,
 				});
 		}
         if(!existingEvent && status!=="CREATED")
@@ -139,11 +139,11 @@ router.post("/update", async (req, res) => {
 });
 
 // GET /api/packages/active
-router.get("/active", async (req, res) => {
+router.get("/all", async (req, res) => {
 	try {
 		const cutoff = new Date(bdNow() - 24 * 60 * 60 * 1000); // 24h ago from BD time
 		const packages = await Package.find({
-			status: { $nin: ["DELIVERED", "CANCELLED"] },
+			//status: { $nin: ["DELIVERED", "CANCELLED"] },
 			event_timestamp: { $gte: cutoff },
 		}).sort({ event_timestamp: -1 });
 

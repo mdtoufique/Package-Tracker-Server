@@ -47,6 +47,7 @@ export async function checkStuckPackages() {
           received_at: new Date(Date.now() + 6 * 60 * 60 * 1000),
         });
 
+        
         // Update package status to STUCK
         pkg.status = 'STUCK';
         pkg.note = `Package ${pkg.package_id} stuck in state "${pkg.status}".`;
