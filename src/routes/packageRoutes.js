@@ -62,7 +62,7 @@ router.post("/update", async (req, res) => {
 				existing.event_timestamp = event_timestamp;
 				existing.received_at = received_at;
 				existing.note = note;
-				existing.eta = eta ? eta : undefined;
+				existing.eta = eta ? eta : existing.eta;
 
 				await existing.save();
 			}
