@@ -12,6 +12,7 @@ app.use(cors({
     'https://package-tracker-client.vercel.app'
   ],
   methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'x-api-token'],
 }));
 
 app.use(express.json());
