@@ -7,7 +7,9 @@ const STUCK_THRESHOLD_MINUTES = 30;
 
 export function startAlertService() {
   // Runs every 5 minutes
-  cron.schedule('*/5 * * * *', async () => {
+
+  
+  cron.schedule('*/2 * * * *', async () => {
     console.log(`[AlertService] Checking stuck packages at ${new Date().toISOString()}`);
 
     try {
@@ -22,21 +24,21 @@ export function startAlertService() {
 
       for (const pkg of stuckPackages) {
         // Check if an alert already exists for this stuck state
-        const existingAlert = await Alert.findOne({
-          package_id: pkg.package_id,
-          resolved: false,
-        });
+        // const existingAlert = await Alert.findOne({
+        //   package_id: pkg.package_id,
+        //   resolved: false,
+        // });
 
-        if (!existingAlert) {
-          // Create new alert
-          const alert = new Alert({
-            package_id: pkg.package_id,
-            message: `Package ${pkg.package_id} stuck in state "${pkg.status}".`,
-            created_at: new Date(Date.now() + 6 * 60 * 60 * 1000),
-            resolved: false,
-            resolved_at: null,
-          });
-          await alert.save();
+        // if (!existingAlert) {
+        //   // Create new alert
+        //   const alert = new Alert({
+        //     package_id: pkg.package_id,
+        //     message: `Package ${pkg.package_id} stuck in state "${pkg.status}".`,
+        //     created_at: new Date(Date.now() + 6 * 60 * 60 * 1000),
+        //     resolved: false,
+        //     resolved_at: null,
+        //   });
+        //   await alert.save();
           //pruct state event update
           await PackageEvent.create({
                 package_id: pkg.package_id,
@@ -53,35 +55,35 @@ export function startAlertService() {
             
             pkg.note=`Package ${pkg.package_id} stuck in state "${pkg.status}".`;
             pkg.status = 'STUCK';
-            pkg.event_timestamp=new Date(Date.now() + 6 * 60 * 60 * 1000);
+            //pkg.event_timestamp=new Date(Date.now() + 6 * 60 * 60 * 1000);
             await pkg.save();
           console.log(`[AlertService] Alert created for package: ${pkg.package_id}`);
-        } else {
-          console.log(`[AlertService] Alert already exists for package: ${pkg.package_id}`);
-        }
+        // } else {
+        //   console.log(`[AlertService] Alert already exists for package: ${pkg.package_id}`);
+        // }
       }
 
       // Resolve alerts for packages no longer stuck
-      const now = new Date(Date.now() + 6 * 60 * 60 * 1000);
-      const recentCutoff = new Date(now - STUCK_THRESHOLD_MINUTES * 60 * 1000);
+      // const now = new Date(Date.now() + 6 * 60 * 60 * 1000);
+      // const recentCutoff = new Date(now - STUCK_THRESHOLD_MINUTES * 60 * 1000);
 
-      const activeAlerts = await Alert.find({ resolved: false });
+      // const activeAlerts = await Alert.find({ resolved: false });
 
-      for (const alert of activeAlerts) {
-        const pkg = await Package.findOne({ package_id: alert.package_id });
-        if (!pkg) continue;
+      // for (const alert of activeAlerts) {
+      //   const pkg = await Package.findOne({ package_id: alert.package_id });
+      //   if (!pkg) continue;
 
-        if (
-          pkg.status === 'DELIVERED' ||
-          pkg.status === 'CANCELLED' ||
-          pkg.event_timestamp > recentCutoff
-        ) {
-          alert.resolved = true;
-          alert.resolved_at = new Date(Date.now() + 6 * 60 * 60 * 1000);
-          await alert.save();
-          console.log(`[AlertService] Alert resolved for package: ${alert.package_id}`);
-        }
-      }
+      //   if (
+      //     pkg.status === 'DELIVERED' ||
+      //     pkg.status === 'CANCELLED' ||
+      //     pkg.event_timestamp > recentCutoff
+      //   ) {
+      //     alert.resolved = true;
+      //     alert.resolved_at = new Date(Date.now() + 6 * 60 * 60 * 1000);
+      //     await alert.save();
+      //     console.log(`[AlertService] Alert resolved for package: ${alert.package_id}`);
+      //   }
+      // }
     } catch (error) {
       console.error('[AlertService] Error checking stuck packages:', error);
     }

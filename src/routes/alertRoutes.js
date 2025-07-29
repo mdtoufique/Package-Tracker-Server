@@ -1,19 +1,29 @@
 import express from 'express';
 import Alert from '../models/Alert.js';
+import Package from '../models/Package.js';
 import  {checkStuckPackages} from '../services/alertServiceCJ.js';
 const router = express.Router();
 
+// router.get('/', async (req, res) => {
+//   try {
+//     const { resolved } = req.query;
+//     const filter = {};
+//     if (resolved === 'false') filter.resolved = false;
+//     else if (resolved === 'true') filter.resolved = true;
+
+//     const alerts = await Alert.find(filter).sort({ created_at: -1 });
+//     res.json(alerts);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Failed to fetch alerts' });
+//   }
+// });
 router.get('/', async (req, res) => {
   try {
-    const { resolved } = req.query;
-    const filter = {};
-    if (resolved === 'false') filter.resolved = false;
-    else if (resolved === 'true') filter.resolved = true;
-
-    const alerts = await Alert.find(filter).sort({ created_at: -1 });
-    res.json(alerts);
+    console.log("hi");
+    const packages = await Package.find({ status: 'STUCK' }).sort({ created_at: -1 });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch alerts' });
+    console.error('❌ Failed to fetch STUCK packages:', err);
+    res.status(500).json({ error: 'Failed to fetch stuck packages' });
   }
 });
 
@@ -28,13 +38,23 @@ router.post('/check-stuck', async (req, res) => {
 
 
 
+// router.get("/count", async (req, res) => {
+//   try {
+//     const resolved = req.query.resolved === "true";
+//     const count = await Alert.countDocuments({ resolved });
+//     res.json({ count });
+//   } catch (error) {
+//     console.error("❌ Failed to count alerts:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
 router.get("/count", async (req, res) => {
   try {
-    const resolved = req.query.resolved === "true";
-    const count = await Alert.countDocuments({ resolved });
+    const count = await Package.countDocuments({ state: "STUCK" });
     res.json({ count });
   } catch (error) {
-    console.error("❌ Failed to count alerts:", error);
+    console.error("❌ Failed to count STUCK packages:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
