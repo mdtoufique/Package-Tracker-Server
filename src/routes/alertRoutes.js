@@ -53,7 +53,7 @@ router.post('/check-stuck', async (req, res) => {
 
 router.get("/count", async (req, res) => {
   try {
-    const count = await Package.countDocuments({ state: "STUCK" });
+    const count = await Package.countDocuments({ status: "STUCK" });
     res.json({ count });
   } catch (error) {
     console.error("❌ Failed to count STUCK packages:", error);
