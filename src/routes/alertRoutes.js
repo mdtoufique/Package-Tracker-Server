@@ -19,8 +19,10 @@ const router = express.Router();
 // });
 router.get('/', async (req, res) => {
   try {
-    console.log("hi");
+    
     const packages = await Package.find({ status: 'STUCK' }).sort({ created_at: -1 });
+    
+    res.json(packages);
   } catch (err) {
     console.error('❌ Failed to fetch STUCK packages:', err);
     res.status(500).json({ error: 'Failed to fetch stuck packages' });
